@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Eternal Quest - RPG Игра</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #1a1a2e;
+            color: #fff;
+            font-family: 'Arial', sans-serif;
+        }
+
+        .game-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 20px;
+        }
+
+        .game-area {
+            background-color: #16213e;
+            border-radius: 10px;
+            padding: 20px;
+            min-height: 600px;
+        }
+
+        .game-info {
+            background-color: #16213e;
+            border-radius: 10px;
+            padding: 20px;
+        }
+
+        .character-stats {
+            margin-bottom: 20px;
+        }
+
+        .stat-bar {
+            background-color: #333;
+            height: 20px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            overflow: hidden;
+        }
+
+        .hp-bar {
+            background-color: #ff0000;
+            height: 100%;
+            width: 100%;
+        }
+
+        .mp-bar {
+            background-color: #0000ff;
+            height: 100%;
+            width: 100%;
+        }
+
+        .inventory {
+            margin-top: 20px;
+        }
+
+        .inventory-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+        }
+
+        .item {
+            background-color: #333;
+            padding: 10px;
+            border-radius: 5px;
+            text-align: center;
+            cursor: pointer;
+        }
+
+        .item:hover {
+            background-color: #444;
+        }
+
+        .action-buttons {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .game-button {
+            background: linear-gradient(45deg, #4CAF50, #45a049);
+            border: none;
+            color: white;
+            padding: 15px 30px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 18px;
+            margin: 4px 2px;
+            cursor: pointer;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            font-weight: bold;
+            letter-spacing: 1px;
+        }
+
+        .game-button:hover {
+            background: linear-gradient(45deg, #45a049, #4CAF50);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .game-button:active {
+            transform: translateY(1px);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .battle-log {
+            background-color: #333;
+            padding: 10px;
+            border-radius: 5px;
+            height: 200px;
+            overflow-y: auto;
+            margin-top: 20px;
+        }
+
+        .location-description {
+            margin-bottom: 20px;
+            padding: 10px;
+            background-color: #333;
+            border-radius: 5px;
+        }
+
+        .quest-log {
+            margin-top: 20px;
+        }
+
+        .quest-item {
+            background-color: #333;
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <div class="game-area">
+            <div class="location-description" id="location-description">
+                Добро пожаловать в деревню! Здесь вы можете отдохнуть и подготовиться к приключениям.
+            </div>
+            
+            <div class="battle-log" id="battle-log">
+                <!-- Здесь будет отображаться лог боя -->
+            </div>
+
+            <div class="action-buttons">
+                <button class="game-button" id="explore-btn">Исследовать</button>
+                <button class="game-button" id="rest-btn">Отдохнуть</button>
+                <button class="game-button" id="shop-btn">Магазин</button>
+                <button class="game-button" id="quests-btn">Квесты</button>
+            </div>
+        </div>
+
+        <div class="game-info">
+            <div class="character-stats">
+                <h2>Характеристики</h2>
+                <div>
+                    <p>Уровень: <span id="level">1</span></p>
+                    <p>Опыт: <span id="exp">0</span>/<span id="exp-to-next">100</span></p>
+                </div>
+                <div>
+                    <p>Здоровье:</p>
+                    <div class="stat-bar">
+                        <div class="hp-bar" id="hp-bar"></div>
+                    </div>
+                    <p><span id="hp">100</span>/<span id="max-hp">100</span></p>
+                </div>
+                <div>
+                    <p>Мана:</p>
+                    <div class="stat-bar">
+                        <div class="mp-bar" id="mp-bar"></div>
+                    </div>
+                    <p><span id="mp">50</span>/<span id="max-mp">50</span></p>
+                </div>
+                <div>
+                    <p>Сила: <span id="str">10</span></p>
+                    <p>Ловкость: <span id="dex">10</span></p>
+                    <p>Интеллект: <span id="int">10</span></p>
+                </div>
+            </div>
+
+            <div class="inventory">
+                <h2>Инвентарь</h2>
+                <div class="inventory-grid" id="inventory">
+                    <!-- Здесь будут отображаться предметы -->
+                </div>
+            </div>
+
+            <div class="quest-log">
+                <h2>Активные квесты</h2>
+                <div id="quests">
+                    <!-- Здесь будут отображаться квесты -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="rpg_game.js"></script>
+    <script src="game_engine.js"></script>
+</body>
+</html> 
