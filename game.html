@@ -1,233 +1,287 @@
-class GameEngine {
-    constructor() {
-        this.character = null;
-        this.currentLocation = null;
-        this.battleLog = document.getElementById('battle-log');
-        this.locationDescription = document.getElementById('location-description');
-        this.inventory = document.getElementById('inventory');
-        this.quests = document.getElementById('quests');
-        
-        // Инициализация кнопок
-        this.initButtons();
-        
-        // Загрузка сохраненной игры
-        this.loadGame();
-    }
-    
-    initButtons() {
-        document.getElementById('explore-btn').addEventListener('click', () => this.explore());
-        document.getElementById('rest-btn').addEventListener('click', () => this.rest());
-        document.getElementById('shop-btn').addEventListener('click', () => this.openShop());
-        document.getElementById('quests-btn').addEventListener('click', () => this.showQuests());
-    }
-    
-    loadGame() {
-        // Загрузка сохраненной игры или создание новой
-        const savedGame = localStorage.getItem('eternalQuest');
-        if (savedGame) {
-            const gameData = JSON.parse(savedGame);
-            this.character = new Character(gameData.character.name, gameData.character.class);
-            Object.assign(this.character, gameData.character);
-            this.currentLocation = gameData.currentLocation;
-        } else {
-            this.startNewGame();
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Eternal Quest - RPG Игра</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent;
         }
-        
-        this.updateUI();
-    }
-    
-    startNewGame() {
-        // Создание нового персонажа
-        this.character = new Character('Герой', 'warrior');
-        this.currentLocation = 'village';
-        
-        // Добавление начальных предметов
-        this.character.addItem(items.weapons[0]);
-        this.character.addItem(items.armor[0]);
-        
-        // Добавление начального квеста
-        this.character.addQuest(quests.forest[0]);
-        
-        this.saveGame();
-    }
-    
-    saveGame() {
-        const gameData = {
-            character: this.character,
-            currentLocation: this.currentLocation
-        };
-        localStorage.setItem('eternalQuest', JSON.stringify(gameData));
-    }
-    
-    updateUI() {
-        // Обновление характеристик
-        document.getElementById('level').textContent = this.character.level;
-        document.getElementById('exp').textContent = this.character.exp;
-        document.getElementById('exp-to-next').textContent = this.character.expToNextLevel;
-        
-        document.getElementById('hp').textContent = this.character.stats.hp;
-        document.getElementById('max-hp').textContent = this.character.stats.maxHp;
-        document.getElementById('mp').textContent = this.character.stats.mp;
-        document.getElementById('max-mp').textContent = this.character.stats.maxMp;
-        
-        document.getElementById('str').textContent = this.character.stats.str;
-        document.getElementById('dex').textContent = this.character.stats.dex;
-        document.getElementById('int').textContent = this.character.stats.int;
-        
-        // Обновление полосок здоровья и маны
-        document.getElementById('hp-bar').style.width = `${(this.character.stats.hp / this.character.stats.maxHp) * 100}%`;
-        document.getElementById('mp-bar').style.width = `${(this.character.stats.mp / this.character.stats.maxMp) * 100}%`;
-        
-        // Обновление инвентаря
-        this.updateInventory();
-        
-        // Обновление квестов
-        this.updateQuests();
-        
-        // Обновление описания локации
-        this.updateLocationDescription();
-    }
-    
-    updateInventory() {
-        this.inventory.innerHTML = '';
-        
-        // Отображение оружия
-        this.character.inventory.weapons.forEach(weapon => {
-            const itemElement = document.createElement('div');
-            itemElement.className = 'item';
-            itemElement.textContent = weapon.name;
-            itemElement.addEventListener('click', () => this.equipItem(weapon));
-            this.inventory.appendChild(itemElement);
-        });
-        
-        // Отображение брони
-        this.character.inventory.armor.forEach(armor => {
-            const itemElement = document.createElement('div');
-            itemElement.className = 'item';
-            itemElement.textContent = armor.name;
-            itemElement.addEventListener('click', () => this.equipItem(armor));
-            this.inventory.appendChild(itemElement);
-        });
-        
-        // Отображение зелий
-        this.character.inventory.potions.forEach(potion => {
-            const itemElement = document.createElement('div');
-            itemElement.className = 'item';
-            itemElement.textContent = potion.name;
-            itemElement.addEventListener('click', () => this.usePotion(potion));
-            this.inventory.appendChild(itemElement);
-        });
-    }
-    
-    updateQuests() {
-        this.quests.innerHTML = '';
-        
-        this.character.status.quests.forEach(quest => {
-            const questElement = document.createElement('div');
-            questElement.className = 'quest-item';
-            questElement.innerHTML = `
-                <h3>${quest.title}</h3>
-                <p>${quest.description}</p>
-                <p>Награда: ${quest.reward.exp} опыта, ${quest.reward.gold} золота</p>
-            `;
-            this.quests.appendChild(questElement);
-        });
-    }
-    
-    updateLocationDescription() {
-        const location = locations[this.currentLocation];
-        this.locationDescription.textContent = location.description;
-    }
-    
-    explore() {
-        const location = locations[this.currentLocation];
-        if (location.monsters.length > 0) {
-            const randomMonster = location.monsters[Math.floor(Math.random() * location.monsters.length)];
-            this.startBattle(randomMonster);
-        } else {
-            this.addToLog('Здесь нечего исследовать.');
-        }
-    }
-    
-    startBattle(monster) {
-        this.addToLog(`Вы встретили ${monster.name}!`);
-        
-        while (this.character.stats.hp > 0 && monster.stats.hp > 0) {
-            // Атака персонажа
-            const playerDamage = this.character.attack(monster);
-            this.addToLog(`Вы нанесли ${playerDamage} урона ${monster.name}!`);
-            
-            if (monster.stats.hp <= 0) {
-                this.addToLog(`Вы победили ${monster.name}!`);
-                this.character.gainExp(monster.expReward);
-                break;
-            }
-            
-            // Атака монстра
-            const monsterDamage = monster.attack(this.character);
-            this.addToLog(`${monster.name} нанес вам ${monsterDamage} урона!`);
-            
-            if (this.character.stats.hp <= 0) {
-                this.addToLog('Вы погибли!');
-                this.character.die();
-                break;
-            }
-        }
-        
-        this.updateUI();
-        this.saveGame();
-    }
-    
-    rest() {
-        this.character.stats.hp = this.character.stats.maxHp;
-        this.character.stats.mp = this.character.stats.maxMp;
-        this.addToLog('Вы отдохнули и восстановили здоровье и ману.');
-        this.updateUI();
-        this.saveGame();
-    }
-    
-    openShop() {
-        // TODO: Реализовать магазин
-        this.addToLog('Магазин пока закрыт.');
-    }
-    
-    showQuests() {
-        // TODO: Реализовать меню квестов
-        this.addToLog('Меню квестов пока недоступно.');
-    }
-    
-    equipItem(item) {
-        this.character.equipItem(item);
-        this.addToLog(`Вы экипировали ${item.name}`);
-        this.updateUI();
-        this.saveGame();
-    }
-    
-    usePotion(potion) {
-        if (potion.heal) {
-            this.character.stats.hp = Math.min(this.character.stats.maxHp, this.character.stats.hp + potion.heal);
-            this.addToLog(`Вы использовали ${potion.name} и восстановили ${potion.heal} здоровья.`);
-        } else if (potion.restoreMp) {
-            this.character.stats.mp = Math.min(this.character.stats.maxMp, this.character.stats.mp + potion.restoreMp);
-            this.addToLog(`Вы использовали ${potion.name} и восстановили ${potion.restoreMp} маны.`);
-        }
-        
-        // Удаление использованного зелья
-        this.character.inventory.potions = this.character.inventory.potions.filter(p => p !== potion);
-        
-        this.updateUI();
-        this.saveGame();
-    }
-    
-    addToLog(message) {
-        const logEntry = document.createElement('p');
-        logEntry.textContent = message;
-        this.battleLog.appendChild(logEntry);
-        this.battleLog.scrollTop = this.battleLog.scrollHeight;
-    }
-}
 
-// Инициализация игры при загрузке страницы
-window.addEventListener('load', () => {
-    const game = new GameEngine();
-}); 
+        body {
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            color: #fff;
+            font-family: 'Arial', sans-serif;
+            min-height: 100vh;
+            overflow-x: hidden;
+            padding: 0;
+            position: relative;
+        }
+
+        .game-container {
+            width: 100%;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            padding: 10px;
+            position: relative;
+        }
+
+        .game-area, .game-info {
+            background: rgba(22, 33, 62, 0.8);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 15px;
+            width: 100%;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .character-stats {
+            margin-bottom: 15px;
+            background: rgba(51, 51, 51, 0.3);
+            padding: 10px;
+            border-radius: 10px;
+        }
+
+        .stat-bar {
+            background: rgba(51, 51, 51, 0.5);
+            height: 20px;
+            border-radius: 10px;
+            margin-bottom: 8px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .hp-bar {
+            background: linear-gradient(90deg, #ff0000, #ff4444);
+            height: 100%;
+            width: 100%;
+            transition: width 0.3s ease;
+        }
+
+        .mp-bar {
+            background: linear-gradient(90deg, #0000ff, #4444ff);
+            height: 100%;
+            width: 100%;
+            transition: width 0.3s ease;
+        }
+
+        .inventory {
+            margin-top: 15px;
+            background: rgba(51, 51, 51, 0.3);
+            padding: 10px;
+            border-radius: 10px;
+        }
+
+        .inventory-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+        }
+
+        .item {
+            background: rgba(51, 51, 51, 0.5);
+            padding: 12px;
+            border-radius: 10px;
+            text-align: center;
+            cursor: pointer;
+            font-size: 14px;
+            transition: transform 0.2s ease;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .item:active {
+            transform: scale(0.95);
+        }
+
+        .action-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 15px;
+            position: sticky;
+            bottom: 10px;
+            z-index: 100;
+        }
+
+        .game-button {
+            background: linear-gradient(45deg, #4CAF50, #45a049);
+            border: none;
+            color: white;
+            padding: 15px 25px;
+            text-align: center;
+            text-decoration: none;
+            display: block;
+            font-size: 16px;
+            cursor: pointer;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            transition: all 0.2s ease;
+            text-transform: uppercase;
+            font-weight: bold;
+            letter-spacing: 1px;
+            width: 100%;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .game-button:active {
+            transform: scale(0.98);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .battle-log {
+            background: rgba(51, 51, 51, 0.3);
+            padding: 12px;
+            border-radius: 10px;
+            height: 150px;
+            overflow-y: auto;
+            margin-top: 15px;
+            font-size: 14px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .location-description {
+            margin-bottom: 15px;
+            padding: 12px;
+            background: rgba(51, 51, 51, 0.3);
+            border-radius: 10px;
+            font-size: 14px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .quest-log {
+            margin-top: 15px;
+            background: rgba(51, 51, 51, 0.3);
+            padding: 10px;
+            border-radius: 10px;
+        }
+
+        .quest-item {
+            background: rgba(51, 51, 51, 0.5);
+            padding: 12px;
+            margin-bottom: 8px;
+            border-radius: 10px;
+            font-size: 14px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        h2 {
+            font-size: 18px;
+            margin-bottom: 12px;
+            color: #4CAF50;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        p {
+            font-size: 14px;
+            margin-bottom: 6px;
+            color: #fff;
+        }
+
+        /* Стилизация скроллбара */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(51, 51, 51, 0.3);
+            border-radius: 3px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #4CAF50;
+            border-radius: 3px;
+        }
+
+        /* Анимации */
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.02); }
+            100% { transform: scale(1); }
+        }
+
+        .game-button {
+            animation: pulse 2s infinite;
+        }
+
+        /* Поддержка темной темы */
+        @media (prefers-color-scheme: dark) {
+            body {
+                background: linear-gradient(135deg, #0a0a1a, #0f0f2a);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <div class="game-area">
+            <div class="location-description" id="location-description">
+                Добро пожаловать в деревню! Здесь вы можете отдохнуть и подготовиться к приключениям.
+            </div>
+            
+            <div class="battle-log" id="battle-log">
+                <!-- Здесь будет отображаться лог боя -->
+            </div>
+
+            <div class="action-buttons">
+                <button class="game-button" id="explore-btn">Исследовать</button>
+                <button class="game-button" id="rest-btn">Отдохнуть</button>
+                <button class="game-button" id="shop-btn">Магазин</button>
+                <button class="game-button" id="quests-btn">Квесты</button>
+            </div>
+        </div>
+
+        <div class="game-info">
+            <div class="character-stats">
+                <h2>Характеристики</h2>
+                <div>
+                    <p>Уровень: <span id="level">1</span></p>
+                    <p>Опыт: <span id="exp">0</span>/<span id="exp-to-next">100</span></p>
+                </div>
+                <div>
+                    <p>Здоровье:</p>
+                    <div class="stat-bar">
+                        <div class="hp-bar" id="hp-bar"></div>
+                    </div>
+                    <p><span id="hp">100</span>/<span id="max-hp">100</span></p>
+                </div>
+                <div>
+                    <p>Мана:</p>
+                    <div class="stat-bar">
+                        <div class="mp-bar" id="mp-bar"></div>
+                    </div>
+                    <p><span id="mp">50</span>/<span id="max-mp">50</span></p>
+                </div>
+                <div>
+                    <p>Сила: <span id="str">10</span></p>
+                    <p>Ловкость: <span id="dex">10</span></p>
+                    <p>Интеллект: <span id="int">10</span></p>
+                </div>
+            </div>
+
+            <div class="inventory">
+                <h2>Инвентарь</h2>
+                <div class="inventory-grid" id="inventory">
+                    <!-- Здесь будут отображаться предметы -->
+                </div>
+            </div>
+
+            <div class="quest-log">
+                <h2>Активные квесты</h2>
+                <div id="quests">
+                    <!-- Здесь будут отображаться квесты -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="rpg_game.js"></script>
+    <script src="game_engine.js"></script>
+</body>
+</html> 
