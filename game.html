@@ -3,13 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Eternal Quest - RPG Игра</title>
+    <title>Eternal Quest - RPG Тапалка</title>
     <style>
         * {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
             -webkit-tap-highlight-color: transparent;
+            user-select: none;
         }
 
         body {
@@ -20,6 +21,7 @@
             overflow-x: hidden;
             padding: 0;
             position: relative;
+            touch-action: manipulation;
         }
 
         .game-container {
@@ -27,32 +29,32 @@
             margin: 0;
             display: flex;
             flex-direction: column;
-            gap: 10px;
-            padding: 10px;
+            gap: 8px;
+            padding: 8px;
             position: relative;
         }
 
         .game-area, .game-info {
             background: rgba(22, 33, 62, 0.8);
             backdrop-filter: blur(10px);
-            border-radius: 15px;
-            padding: 15px;
+            border-radius: 12px;
+            padding: 12px;
             width: 100%;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
         }
 
         .character-stats {
-            margin-bottom: 15px;
+            margin-bottom: 12px;
             background: rgba(51, 51, 51, 0.3);
-            padding: 10px;
-            border-radius: 10px;
+            padding: 8px;
+            border-radius: 8px;
         }
 
         .stat-bar {
             background: rgba(51, 51, 51, 0.5);
-            height: 20px;
-            border-radius: 10px;
-            margin-bottom: 8px;
+            height: 16px;
+            border-radius: 8px;
+            margin-bottom: 6px;
             overflow: hidden;
             position: relative;
         }
@@ -72,27 +74,31 @@
         }
 
         .inventory {
-            margin-top: 15px;
+            margin-top: 12px;
             background: rgba(51, 51, 51, 0.3);
-            padding: 10px;
-            border-radius: 10px;
+            padding: 8px;
+            border-radius: 8px;
         }
 
         .inventory-grid {
             display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 10px;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 6px;
         }
 
         .item {
             background: rgba(51, 51, 51, 0.5);
-            padding: 12px;
-            border-radius: 10px;
+            padding: 8px;
+            border-radius: 8px;
             text-align: center;
             cursor: pointer;
-            font-size: 14px;
-            transition: transform 0.2s ease;
+            font-size: 12px;
+            transition: transform 0.1s ease;
             border: 1px solid rgba(255, 255, 255, 0.1);
+            aspect-ratio: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
         .item:active {
@@ -100,114 +106,170 @@
         }
 
         .action-buttons {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            margin-top: 15px;
-            position: sticky;
-            bottom: 10px;
-            z-index: 100;
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 6px;
+            margin-top: 12px;
         }
 
         .game-button {
             background: linear-gradient(45deg, #4CAF50, #45a049);
             border: none;
             color: white;
-            padding: 15px 25px;
+            padding: 8px 12px;
             text-align: center;
             text-decoration: none;
             display: block;
-            font-size: 16px;
+            font-size: 14px;
             cursor: pointer;
-            border-radius: 12px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-            transition: all 0.2s ease;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+            transition: all 0.1s ease;
             text-transform: uppercase;
             font-weight: bold;
-            letter-spacing: 1px;
+            letter-spacing: 0.5px;
             width: 100%;
-            position: relative;
-            overflow: hidden;
         }
 
         .game-button:active {
             transform: scale(0.98);
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
         }
 
         .battle-log {
             background: rgba(51, 51, 51, 0.3);
-            padding: 12px;
-            border-radius: 10px;
-            height: 150px;
+            padding: 8px;
+            border-radius: 8px;
+            height: 120px;
             overflow-y: auto;
-            margin-top: 15px;
-            font-size: 14px;
+            margin-top: 12px;
+            font-size: 12px;
             border: 1px solid rgba(255, 255, 255, 0.1);
         }
 
         .location-description {
-            margin-bottom: 15px;
-            padding: 12px;
+            margin-bottom: 12px;
+            padding: 8px;
             background: rgba(51, 51, 51, 0.3);
-            border-radius: 10px;
-            font-size: 14px;
+            border-radius: 8px;
+            font-size: 12px;
             border: 1px solid rgba(255, 255, 255, 0.1);
         }
 
         .quest-log {
-            margin-top: 15px;
+            margin-top: 12px;
             background: rgba(51, 51, 51, 0.3);
-            padding: 10px;
-            border-radius: 10px;
+            padding: 8px;
+            border-radius: 8px;
         }
 
         .quest-item {
             background: rgba(51, 51, 51, 0.5);
-            padding: 12px;
-            margin-bottom: 8px;
-            border-radius: 10px;
-            font-size: 14px;
+            padding: 8px;
+            margin-bottom: 6px;
+            border-radius: 8px;
+            font-size: 12px;
             border: 1px solid rgba(255, 255, 255, 0.1);
         }
 
         h2 {
-            font-size: 18px;
-            margin-bottom: 12px;
+            font-size: 16px;
+            margin-bottom: 8px;
             color: #4CAF50;
-            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
         }
 
         p {
-            font-size: 14px;
-            margin-bottom: 6px;
+            font-size: 12px;
+            margin-bottom: 4px;
             color: #fff;
         }
 
         /* Стилизация скроллбара */
         ::-webkit-scrollbar {
-            width: 6px;
+            width: 4px;
         }
 
         ::-webkit-scrollbar-track {
             background: rgba(51, 51, 51, 0.3);
-            border-radius: 3px;
+            border-radius: 2px;
         }
 
         ::-webkit-scrollbar-thumb {
             background: #4CAF50;
-            border-radius: 3px;
+            border-radius: 2px;
         }
 
-        /* Анимации */
-        @keyframes pulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.02); }
-            100% { transform: scale(1); }
+        /* Новые элементы для тапалки */
+        .tap-area {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 60px;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            padding: 8px;
+            z-index: 1000;
         }
 
-        .game-button {
-            animation: pulse 2s infinite;
+        .tap-button {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: rgba(76, 175, 80, 0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 24px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+            transition: all 0.1s ease;
+        }
+
+        .tap-button:active {
+            transform: scale(0.95);
+            background: rgba(76, 175, 80, 1);
+        }
+
+        .enemy {
+            position: absolute;
+            width: 60px;
+            height: 60px;
+            background: rgba(255, 0, 0, 0.8);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+            transition: all 0.1s ease;
+        }
+
+        .enemy:active {
+            transform: scale(0.95);
+        }
+
+        .damage-text {
+            position: absolute;
+            color: #ff0000;
+            font-size: 16px;
+            font-weight: bold;
+            animation: float-up 1s ease-out forwards;
+        }
+
+        @keyframes float-up {
+            0% {
+                transform: translateY(0);
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(-50px);
+                opacity: 0;
+            }
         }
 
         /* Поддержка темной темы */
@@ -215,6 +277,208 @@
             body {
                 background: linear-gradient(135deg, #0a0a1a, #0f0f2a);
             }
+        }
+
+        /* Стили для лягушек-героев в стиле Пепе */
+        .frog-hero {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            position: absolute;
+            bottom: 80px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #7BC043;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            transition: all 0.2s ease;
+        }
+
+        .frog-hero::before {
+            content: '';
+            position: absolute;
+            width: 85px;
+            height: 40px;
+            background: #7BC043;
+            border-radius: 50% 50% 0 0;
+            top: -15px;
+            left: -2px;
+            transform: rotate(-5deg);
+        }
+
+        .frog-eyes {
+            position: absolute;
+            width: 70px;
+            height: 30px;
+            top: 15px;
+            display: flex;
+            justify-content: space-around;
+            z-index: 2;
+        }
+
+        .frog-eye {
+            width: 25px;
+            height: 25px;
+            background: white;
+            border-radius: 50%;
+            position: relative;
+            border: 2px solid #000;
+        }
+
+        .frog-eye::after {
+            content: '';
+            position: absolute;
+            width: 12px;
+            height: 12px;
+            background: black;
+            border-radius: 50%;
+            top: 4px;
+            left: 4px;
+        }
+
+        .frog-mouth {
+            position: absolute;
+            width: 40px;
+            height: 20px;
+            background: #FF6B6B;
+            border-radius: 0 0 20px 20px;
+            bottom: 15px;
+            border: 2px solid #000;
+        }
+
+        /* Добавляем характерные черты Пепе */
+        .frog-hero::after {
+            content: '';
+            position: absolute;
+            width: 85px;
+            height: 45px;
+            background: #7BC043;
+            border-radius: 0 0 50% 50%;
+            bottom: -15px;
+            left: -2px;
+            transform: rotate(5deg);
+        }
+
+        .frog-eyelids {
+            position: absolute;
+            width: 70px;
+            height: 15px;
+            top: 12px;
+            display: flex;
+            justify-content: space-around;
+            z-index: 3;
+        }
+
+        .frog-eyelid {
+            width: 27px;
+            height: 15px;
+            background: #7BC043;
+            border-radius: 50% 50% 0 0;
+            border-top: 2px solid #000;
+        }
+
+        /* Анимации для Пепе */
+        @keyframes pepe-blink {
+            0%, 90%, 100% { transform: translateY(-15px); }
+            95% { transform: translateY(0); }
+        }
+
+        .frog-eyelid {
+            animation: pepe-blink 4s infinite;
+        }
+
+        @keyframes pepe-sad {
+            0% { transform: rotate(0deg); }
+            50% { transform: rotate(-10deg); }
+            100% { transform: rotate(0deg); }
+        }
+
+        .frog-hero.sad .frog-mouth {
+            animation: pepe-sad 2s infinite;
+        }
+
+        /* Стили для врагов-лягушек (тоже в стиле Пепе, но злые) */
+        .enemy-frog {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            position: absolute;
+            background: #FF4444;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 90;
+            transition: all 0.2s ease;
+        }
+
+        .enemy-frog .frog-eye {
+            width: 20px;
+            height: 20px;
+            border: 2px solid #000;
+        }
+
+        .enemy-frog .frog-eye::after {
+            width: 8px;
+            height: 8px;
+            top: 4px;
+            left: 4px;
+        }
+
+        .enemy-frog .frog-mouth {
+            width: 30px;
+            height: 15px;
+            border: 2px solid #000;
+            background: #000;
+        }
+
+        /* Добавляем брови для злых Пепе */
+        .enemy-frog::before {
+            content: '';
+            position: absolute;
+            width: 15px;
+            height: 4px;
+            background: #000;
+            top: 10px;
+            left: 10px;
+            transform: rotate(-45deg);
+        }
+
+        .enemy-frog::after {
+            content: '';
+            position: absolute;
+            width: 15px;
+            height: 4px;
+            background: #000;
+            top: 10px;
+            right: 10px;
+            transform: rotate(45deg);
+        }
+
+        /* Анимация получения урона */
+        @keyframes take-damage {
+            0% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            50% { transform: translateX(10px); }
+            75% { transform: translateX(-10px); }
+            100% { transform: translateX(0); }
+        }
+
+        .enemy-frog.taking-damage {
+            animation: take-damage 0.3s ease;
+        }
+
+        /* Зона боя */
+        .battle-area {
+            position: relative;
+            height: 200px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 10px;
+            margin: 10px 0;
+            overflow: hidden;
         }
     </style>
 </head>
@@ -225,6 +489,18 @@
                 Добро пожаловать в деревню! Здесь вы можете отдохнуть и подготовиться к приключениям.
             </div>
             
+            <div class="battle-area">
+                <!-- Герой-лягушка -->
+                <div class="frog-hero">
+                    <div class="frog-eyes">
+                        <div class="frog-eye"></div>
+                        <div class="frog-eye"></div>
+                    </div>
+                    <div class="frog-mouth"></div>
+                </div>
+                <!-- Здесь будут появляться враги-лягушки -->
+            </div>
+
             <div class="battle-log" id="battle-log">
                 <!-- Здесь будет отображаться лог боя -->
             </div>
@@ -279,6 +555,14 @@
                 </div>
             </div>
         </div>
+    </div>
+
+    <!-- Панель для тапалки -->
+    <div class="tap-area">
+        <div class="tap-button" id="attack-btn">⚔️</div>
+        <div class="tap-button" id="skill-btn">✨</div>
+        <div class="tap-button" id="item-btn">🎒</div>
+        <div class="tap-button" id="run-btn">🏃</div>
     </div>
 
     <script src="rpg_game.js"></script>
