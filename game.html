@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Eternal Conquest - PvP Arena</title>
     <style>
-        /* Основные стили */
+        /* Общие стили */
         * {
             box-sizing: border-box;
             margin: 0;
@@ -38,38 +38,6 @@
             gap: 20px;
         }
 
-        /* Анимации */
-        @keyframes fadeIn {
-            0% {
-                opacity: 0;
-                transform: scale(0.9);
-            }
-
-            100% {
-                opacity: 1;
-                transform: scale(1);
-            }
-        }
-
-        @keyframes pulse {
-            0% {
-                transform: scale(1);
-            }
-
-            50% {
-                transform: scale(1.05);
-            }
-
-            100% {
-                transform: scale(1);
-            }
-        }
-
-        .game-container {
-            animation: fadeIn 0.7s ease-out;
-        }
-
-        /* Зона битвы */
         .battle-area {
             height: 400px;
             background: linear-gradient(135deg, #0a0a1a, #1a1a2e);
@@ -93,27 +61,75 @@
             text-shadow: 0 3px 5px rgba(0, 0, 0, 0.3);
         }
 
-        .player, .enemy {
+        /* Персонажи */
+        .character {
             width: 150px;
             height: 150px;
-            background: #4CAF50;
+            background: #7BC043;
             border-radius: 50%;
+            position: relative;
             display: flex;
             justify-content: center;
             align-items: center;
             font-size: 24px;
             font-weight: bold;
             color: #fff;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
             transition: transform 0.3s ease;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
         }
 
-        .enemy {
-            background: #FF4444;
-        }
-
-        .player:hover, .enemy:hover {
+        .character:hover {
             transform: scale(1.1);
+        }
+
+        .character .eyes {
+            position: absolute;
+            top: 30px;
+            display: flex;
+            gap: 10px;
+        }
+
+        .character .eye {
+            width: 30px;
+            height: 30px;
+            background: white;
+            border-radius: 50%;
+            position: relative;
+        }
+
+        .character .eye::after {
+            content: '';
+            width: 15px;
+            height: 15px;
+            background: black;
+            border-radius: 50%;
+            position: absolute;
+            top: 7px;
+            left: 7px;
+        }
+
+        .character .mouth {
+            position: absolute;
+            bottom: 30px;
+            width: 60px;
+            height: 20px;
+            background: #FF6B6B;
+            border-radius: 0 0 50px 50px;
+        }
+
+        /* Анимации моргания */
+        @keyframes blink {
+            0%, 90%, 100% {
+                transform: scaleY(1);
+            }
+
+            95% {
+                transform: scaleY(0);
+            }
+        }
+
+        .character .eye {
+            animation: blink 4s infinite;
         }
 
         /* Панель управления */
@@ -159,27 +175,6 @@
         .battle-log p {
             margin-bottom: 5px;
         }
-
-        /* Подсветка действий */
-        .damage-text {
-            position: absolute;
-            font-size: 20px;
-            font-weight: bold;
-            color: #FF0000;
-            animation: floatUp 1s ease-out forwards;
-        }
-
-        @keyframes floatUp {
-            0% {
-                opacity: 1;
-                transform: translateY(0);
-            }
-
-            100% {
-                opacity: 0;
-                transform: translateY(-50px);
-            }
-        }
     </style>
 </head>
 
@@ -187,8 +182,20 @@
     <div class="game-container">
         <div class="battle-area">
             <div class="arena-title">Арена PvP</div>
-            <div class="player" id="player">Вы</div>
-            <div class="enemy" id="enemy">Враг</div>
+            <div class="character" id="player">
+                <div class="eyes">
+                    <div class="eye"></div>
+                    <div class="eye"></div>
+                </div>
+                <div class="mouth"></div>
+            </div>
+            <div class="character" id="enemy">
+                <div class="eyes">
+                    <div class="eye"></div>
+                    <div class="eye"></div>
+                </div>
+                <div class="mouth"></div>
+            </div>
         </div>
 
         <div class="control-panel">
@@ -201,75 +208,6 @@
             <p>Добро пожаловать на арену!</p>
         </div>
     </div>
-
-    <script>
-        // Получение элементов
-        const player = document.getElementById('player');
-        const enemy = document.getElementById('enemy');
-        const attackBtn = document.getElementById('attack-btn');
-        const defendBtn = document.getElementById('defend-btn');
-        const specialBtn = document.getElementById('special-btn');
-        const battleLog = document.getElementById('battle-log');
-
-        // Характеристики
-        let playerHp = 100;
-        let enemyHp = 100;
-
-        // Функции для боя
-        function logAction(message) {
-            const logEntry = document.createElement('p');
-            logEntry.textContent = message;
-            battleLog.appendChild(logEntry);
-            battleLog.scrollTop = battleLog.scrollHeight;
-        }
-
-        function attack() {
-            const damage = Math.floor(Math.random() * 20) + 5;
-            enemyHp -= damage;
-            logAction(`Вы нанесли ${damage} урона!`);
-            displayDamage(enemy, damage);
-            checkVictory();
-        }
-
-        function defend() {
-            const block = Math.floor(Math.random() * 10) + 5;
-            logAction(`Вы заблокировали ${block} урона!`);
-        }
-
-        function specialAttack() {
-            const damage = Math.floor(Math.random() * 30) + 10;
-            enemyHp -= damage;
-            logAction(`Специальный удар нанес ${damage} урона!`);
-            displayDamage(enemy, damage);
-            checkVictory();
-        }
-
-        function displayDamage(target, damage) {
-            const damageText = document.createElement('div');
-            damageText.textContent = `-${damage}`;
-            damageText.className = 'damage-text';
-            target.appendChild(damageText);
-
-            setTimeout(() => {
-                damageText.remove();
-            }, 1000);
-        }
-
-        function checkVictory() {
-            if (enemyHp <= 0) {
-                logAction('Вы победили врага!');
-                enemy.textContent = 'KO';
-                attackBtn.disabled = true;
-                defendBtn.disabled = true;
-                specialBtn.disabled = true;
-            }
-        }
-
-        // Обработчики событий
-        attackBtn.addEventListener('click', attack);
-        defendBtn.addEventListener('click', defend);
-        specialBtn.addEventListener('click', specialAttack);
-    </script>
 </body>
 
 </html>
