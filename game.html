@@ -2,15 +2,21 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Eternal Quest - RPG Игра</title>
     <style>
-        body {
+        * {
+            box-sizing: border-box;
             margin: 0;
             padding: 0;
+        }
+
+        body {
             background-color: #1a1a2e;
             color: #fff;
             font-family: 'Arial', sans-serif;
+            min-height: 100vh;
+            overflow-x: hidden;
         }
 
         .game-container {
@@ -105,6 +111,7 @@
             text-transform: uppercase;
             font-weight: bold;
             letter-spacing: 1px;
+            width: 100%;
         }
 
         .game-button:hover {
@@ -143,6 +150,91 @@
             padding: 10px;
             margin-bottom: 10px;
             border-radius: 5px;
+        }
+
+        /* Медиа-запросы для адаптивности */
+        @media screen and (max-width: 1024px) {
+            .game-container {
+                grid-template-columns: 1fr;
+                padding: 15px;
+            }
+
+            .game-button {
+                padding: 12px 24px;
+                font-size: 16px;
+            }
+        }
+
+        @media screen and (max-width: 768px) {
+            .game-container {
+                padding: 10px;
+            }
+
+            .game-area, .game-info {
+                padding: 15px;
+            }
+
+            .inventory-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+
+            .action-buttons {
+                grid-template-columns: 1fr;
+            }
+
+            .stat-bar {
+                height: 15px;
+            }
+        }
+
+        @media screen and (max-width: 480px) {
+            .game-container {
+                padding: 5px;
+            }
+
+            .game-area, .game-info {
+                padding: 10px;
+            }
+
+            .inventory-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .game-button {
+                padding: 10px 20px;
+                font-size: 14px;
+            }
+
+            .battle-log {
+                height: 150px;
+                font-size: 14px;
+            }
+
+            .location-description, .quest-item {
+                font-size: 14px;
+            }
+        }
+
+        /* Стили для тач-устройств */
+        @media (hover: none) {
+            .game-button:hover {
+                transform: none;
+            }
+
+            .item:hover {
+                background-color: #333;
+            }
+        }
+
+        /* Поддержка темной темы */
+        @media (prefers-color-scheme: dark) {
+            body {
+                background-color: #0a0a1a;
+            }
+
+            .game-area, .game-info {
+                background-color: #0f0f2a;
+            }
         }
     </style>
 </head>
